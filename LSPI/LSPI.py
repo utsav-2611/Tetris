@@ -99,6 +99,9 @@ def _is_block(cell):
 def _is_empty(cell):
 	return cell == 0
 
+####################################################################
+##The features are calculated here
+####################################################################
 def _holes_in_board(board):
 	"""A hole is defined as an empty space below a block. 
 	The block doesn't have to be directly above the hole for it to count.
@@ -198,6 +201,11 @@ def sum_adj_diff(board):
 		diff += abs(height[i+1] - height[i])
 	return diff
 
+
+######################################################################
+##End of features calculation
+######################################################################
+
 def rotate_clockwise(shape):
 	return [ [ shape[y][x]
 			for y in xrange(len(shape)) ]
@@ -235,6 +243,11 @@ def new_board():
 	return board
 
 ###
+
+#################################################################
+##A dummyApp same as the Tetris app to calculate valurs in the background
+#################################################################
+
 NUM_WEIGHTS = 6
 GAMMA = 0.9  #tried out values
 
@@ -353,6 +366,11 @@ def GenerateRandomBoard():
 	final_board = dummy_game.board
 	return final_board
 
+
+######################################################
+##The crux of training the weights of the features.
+##Generate random board in each iteration to get new states on which we can train the AI 
+#######################################################
 def LSTDQ_OPT(limit):
 	B = np.zeros((NUM_WEIGHTS,NUM_WEIGHTS)) # B = (1/delta) I
 	for i in range(NUM_WEIGHTS):
