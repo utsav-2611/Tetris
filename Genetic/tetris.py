@@ -50,7 +50,7 @@ import matplotlib.pyplot as plt
 cell_size =	18
 cols =		15
 rows =		28
-maxfps = 	5
+maxfps = 	30
 ppl  =      32 			#population
 attr  =     7			#attributes of chromosome
 limit  =    1000		#since we are dealing with int, so limit for parameter tuning
@@ -94,12 +94,12 @@ tetris_shapes = [
 	 [[6, 6, 6, 6]]					#one more added
 ]
 
-def rotate_clockwise(shape):
+def rotate_clockwise(shape):							#this function takes stone and rotate it clockwise
 	return [ [ shape[y][x]
 			for y in range(len(shape)) ]
 		for x in range(len(shape[0]) - 1, -1, -1) ]
 
-def check_collision(board, shape, offset):
+def check_collision(board, shape, offset):				#this function checks collision of onew stone with another
 	off_x, off_y = offset
 	for cy, row in enumerate(shape):
 		for cx, cell in enumerate(row):
@@ -110,25 +110,25 @@ def check_collision(board, shape, offset):
 				return True
 	return False
 
-def remove_row(board, row):
+def remove_row(board, row):								#this function clears row
 	del board[row]
 	return [[0 for i in range(cols)]] + board
 	
-def join_matrixes(mat1, mat2, mat2_off):
+def join_matrixes(mat1, mat2, mat2_off):				#this function generates new board by adding original board and stone
 	off_x, off_y = mat2_off
 	for cy, row in enumerate(mat2):
 		for cx, val in enumerate(row):
 			mat1[cy+off_y-1	][cx+off_x] += val
 	return mat1
 
-def new_board():
+def new_board():										#this function generates new board
 	board = [ [ 0 for x in range(cols) ]
 			for y in range(rows) ]
 	board += [[ 1 for x in range(cols)]]
 	return board
 
 class TetrisApp(object):
-	def __init__(self,params,test = False):
+	def __init__(self,params,test = False):				#this is a constructor
 		pygame.init()
 		self.test = test
 		pygame.key.set_repeat(250,25)
@@ -150,7 +150,7 @@ class TetrisApp(object):
 		self.next_stone = tetris_shapes[rand(len(tetris_shapes))]
 		self.init_game()
 	
-	def new_stone(self):
+	def new_stone(self):							#this function generates new random stone 
 		self.stone = self.next_stone[:]
 		self.next_stone = tetris_shapes[rand(len(tetris_shapes))]
 		self.stone_x = int(cols / 2 - len(self.stone[0])/2)
@@ -163,7 +163,7 @@ class TetrisApp(object):
 
 
 	
-	def init_game(self):
+	def init_game(self):							#this function initialise the game
 		self.board = new_board()
 		self.stones = 0
 		self.new_stone()
@@ -172,8 +172,8 @@ class TetrisApp(object):
 		self.lines = 0
 		pygame.time.set_timer(pygame.USEREVENT+1, 1000)
 	
-	def disp_msg(self, msg, topleft):
-		x,y = topleft
+	def disp_msg(self, msg, topleft):				#this function display messages after game 
+		x,y = topleft		
 		for line in msg.splitlines():
 			self.screen.blit(
 				self.default_font.render(
@@ -184,7 +184,7 @@ class TetrisApp(object):
 				(x,y))
 			y+=14
 	
-	def center_msg(self, msg):
+	def center_msg(self, msg):						#this function sets message in the center
 		for i, line in enumerate(msg.splitlines()):
 			msg_image =  self.default_font.render(line, False,
 				(255,255,255), (0,0,0))
@@ -197,7 +197,7 @@ class TetrisApp(object):
 			  self.width // 2-msgim_center_x,
 			  self.height // 2-msgim_center_y+i*22))
 	
-	def draw_matrix(self, matrix, offset):
+	def draw_matrix(self, matrix, offset):			#this function draw matrix
 		off_x, off_y  = offset
 		for y, row in enumerate(matrix):
 			for x, val in enumerate(row):
@@ -223,7 +223,7 @@ class TetrisApp(object):
 			newdelay = 100 if newdelay < 100 else newdelay
 			pygame.time.set_timer(pygame.USEREVENT+1, newdelay)
 	
-	def move(self, delta_x):
+	def move(self, delta_x):				
 		if not self.gameover and not self.paused:
 			new_x = self.stone_x + delta_x
 			if new_x < 0:
@@ -295,9 +295,13 @@ class TetrisApp(object):
 			self.init_game()
 			self.gameover = False
 
+#############################################################################################################################
+###Code appended for the project
+##############################################################################################################################
 
-	def height_diff_sum(self,board):
-		global rows,cols
+
+	def height_diff_sum(self,board):						#this function returns difference between maximum and minimum height
+		global rows,cols 									#and sum of heights and height on walls
 		heights = []
 		for y in range(len(board[0])):
 
@@ -312,8 +316,8 @@ class TetrisApp(object):
 		return (hs[-1] - hs[0],sum(heights),heights[0] + heights[cols - 1])
 
 
-	def holes_blockades(self,board):
-		holes = 0 
+	def holes_blockades(self,board):						#this function returns number of holes and 
+		holes = 0 											#number of blockades
 		blockades = 0
 		for y in range(len(board[0])):
 
@@ -335,8 +339,8 @@ class TetrisApp(object):
 
 		return (holes,blockades)
 
-	def clears(self,board):
-
+	def clears(self,board):										#this function returns number of clears (row fully occupied by stones) 
+																#and almost clear (1 or 2 stones left to clear row)
 		holes_in_row = [cols for i in range(len(board))]
 		for y in range(len(board[0])):
 			for x in range(len(board)):
@@ -352,56 +356,8 @@ class TetrisApp(object):
 
 	def score_board(self,board):
 
-		##########################################
-		# global rows,cols
-		# height = 0
-		# holes = 0
-		# holes_in_row = [cols for i in range(len(board))]
-		# blockades = 0
-		# for y in range(len(board[0])):
-		
 
-		# 	h = len(board)
-		# 	x = 0
-		# 	for x in range(len(board)):
-		# 		if board[x][y] != 0:
-		# 			break
-
-		# 		holes_in_row[x] -= 1
-		# 		h -= 1
-		# 	hol = 0
-
-		# 	block = 0
-		# 	flag = 0
-
-		# 	while x<rows:
-		# 		# print(x,y)
-		# 		if board[x][y] == 0:
-		# 			hol += 1
-		# 			blockades += block
-		# 			block = 0
-		# 			holes_in_row[x] -= 1
-		# 		else:
-		# 			block += 1
-
-		# 		x+=1
-
-		# 	height += h
-		# 	surface[x] = h
-		# 	holes += hol
-
-
-
-		# clears = sum(1 if x == 0 else 0  for x in holes_in_row) 
-		# almost_clear = sum(1 if x == 2 or x == 3 else 0 for x in holes_in_row)
-		######################################################
-
-
-		#Add score for [7,7,7,7] be in contact with walls(vertical) or where height is very less
-
-		# return height*(-0.03) + holes*(-7.5) + clears*(15.0) + blockades*(-10.5) + almost_clear*(6.0) #Important one
-
-		(diff,height,walls)  = self.height_diff_sum(board)
+		(diff,height,walls)  = self.height_diff_sum(board)			#this function calculates weighted score
 		(holes,blockades) = self.holes_blockades(board)
 		(clears,almost_clear) = self.clears(board)
 
@@ -409,12 +365,12 @@ class TetrisApp(object):
 
 
 
-	def check_score(self):
-
-		stone = deepcopy(self.stone)
-		stone_x = self.stone_x
-		stone_y = self.stone_y
-		finalScore = (-1)*float("inf")  
+	def check_score(self):							#this function calculates
+													#score for every possible combination 	
+		stone = deepcopy(self.stone)				#of stone with board and  
+		stone_x = self.stone_x						#returns its weighted score
+		stone_y = self.stone_y						
+		finalScore = (-1)*float("inf")  			
 		Right = 0
 		Left = 0
 		Rotations = 0
@@ -495,8 +451,7 @@ class TetrisApp(object):
 		while 1:
 			self.screen.fill((0,0,0))
 			if self.gameover:
-				self.center_msg("""Game Over!\nYour score: %d
-Press space to continue""" % self.score)
+				self.center_msg("""Game Over!\nYour score: %d Press space to continue""" % self.score)
 			else:
 				if self.paused:
 					self.center_msg("Paused")
@@ -508,8 +463,7 @@ Press space to continue""" % self.score)
 					self.disp_msg("Next:", (
 						self.rlim+cell_size,
 						2))
-					self.disp_msg("Score: %d\n\nLevel: %d\
-\nLines: %d" % (self.score, self.level, self.lines),
+					self.disp_msg("Score: %d\n\nLevel: %d\ \nLines: %d" % (self.score, self.level, self.lines),
 						(self.rlim+cell_size, cell_size*5))
 					self.draw_matrix(self.bground_grid, (0,0))
 					self.draw_matrix(self.board, (0,0))
@@ -557,21 +511,8 @@ Press space to continue""" % self.score)
 				elif event.type == pygame.KEYDOWN:
 
 					for key in key_actions:
-						if event.key == eval("pygame.K_"
-						+key):
+						if event.key == eval("pygame.K_"+key):
 							pass
-							# if self.test == True:
-							# key_actions[key]()
-								# (R,L,Rot) = self.check_score()
-
-								# for c in range(Rot):
-								# 	self.rotate_stone()
-								# for c in range(R):
-								# 	self.move(+1)
-								# for c in range(L):
-								# 	self.move(-1)
-
-								# self.insta_drop()
 
 							
 			dont_burn_my_cpu.tick(maxfps)
@@ -579,12 +520,10 @@ Press space to continue""" % self.score)
 	
 
 
+
 class Genetic(object):
-
-
-
-
-	def __init__(self):
+	#Initialise population with random set of parameters
+	def __init__(self):									
 		self.population = []
 		for i in range(ppl):
 			chromosome = []
@@ -597,6 +536,8 @@ class Genetic(object):
 		# self.population[0] = [1,30,60,31,18]			#set manually, gives good score
 
 
+
+	#for every set of parameters it calculates score by running a small instance of game
 	def fitness(self,chromosome):
 		sum_score = 0.0
 		for i in range(num):
@@ -607,6 +548,9 @@ class Genetic(object):
 
 		return sum_score
 
+
+
+	#this function takes two parents and calculates its offspring by random selection and mutation
 	def mating(self,chromosome1, chromosome2):
 		new_chromosome = []
 		for i in range(attr):
@@ -622,6 +566,7 @@ class Genetic(object):
 		return new_chromosome
 
 
+	#this function update the current population by mating of fittest population (mating from 50% of fittest population)
 	def new_population(self):
 		scores = []
 		for chromosome in self.population:
@@ -644,22 +589,22 @@ class Genetic(object):
 
 	def run(self,iterations):
 		for i in range(iterations):
+			print ('generation '+str(i+1)+' population:')
+			print (self.population)
 			self.new_population()
-
-
-
-
-
 
 
 if __name__ == '__main__':
 
 
+
+###These are for training the weights of the feature.
+###Comment these if want to use the already calculated best weights 
 	
-	# for iterations in range(1):
-	# 	Gen = Genetic()
-	# 	Gen.run(10)
-	# 	plt.plot(Gen.plotting)
+	for iterations in range(1):
+		Gen = Genetic()
+		Gen.run(10)
+		# plt.plot(Gen.plotting)
 
 	# plt.xlabel('iteration no.')
 	# plt.ylabel('score (clears)')
@@ -669,8 +614,19 @@ if __name__ == '__main__':
 	# App.run()
 	# App = TetrisApp([42, 21, 57, 27, 15, 16, 43],True)
 	# App.run()
-	App = TetrisApp([38, 32, 59, 45, 46, 10, 40],True) #best 
-	App.run()
+
+
+
+    ###Uncomment these if want to see the AI run the Tetris optimally
+    ###Change the fps to 5 for better visibility
+
+      
+	# App = TetrisApp([38, 32, 59, 45, 46, 10, 40],True) #best 
+	# App.run()
+
+
+
+
 	# App = TetrisApp([29, 12, 58, 40, 23, 3, 14],True)
 	# App.run()
 	# App = TetrisApp([20, 806, 782, 197, 446, 128, 546],True)
